@@ -17,7 +17,7 @@ this project is a typescript implmentation of E-Commerce + Dashboard & CMS.
 
 ## Tech stack:
 
-- [Next.js](https://nextjs.org) 13 App Router, React, [Prisma ORM](https://www.prisma.io), MySQL at [PlanetScale](https://planetscale.com)
+- [Next.js](https://nextjs.org) App Router, React, [Prisma ORM](https://www.prisma.io), MySQL at [tiDB](https://tidbcloud.com)
 - [NextAuth](https://next-auth.js.org) Authentication
 - [Tailwindcss](https://tailwindcss.com/docs/), [Shadcn UI](https://ui.shadcn.com), [Headless UI](https://headlessui.com/), [Lucide Icon](https://lucide.dev/icons/), [material-ui](https://mui.com/material-ui/)
 - [Redis](https://redis.io) in a [cloud](https://app.redislabs.com/#/subscriptions)
@@ -51,7 +51,7 @@ https://stripe.com/docs/payments/save-during-payment
 ### Cloning the repository
 
 ```shell
-git clone https://github.com/mingster/legod.org.git
+git clone https://github.com/mingster/popnmom.org.git
 ```
 
 ### Install packages
