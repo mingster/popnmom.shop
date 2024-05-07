@@ -1,0 +1,21 @@
+CREATE TABLE `Currency` (
+  `id` varchar(191) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `name` varchar(191) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `symbol` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `ISOdigits` int DEFAULT NULL,
+  `ISOnum` int DEFAULT NULL,
+  `decimals` int DEFAULT NULL,
+  `demonym` varchar(191) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `majorPlural` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `majorSingle` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `minorPlural` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `minorSingle` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `numToBasic` int DEFAULT NULL,
+  `symbolNative` varchar(191) COLLATE utf8mb4_unicode_ci NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `Currency_id_key` (`id`),
+  KEY `Currency_name_idx` (`name`),
+  KEY `Currency_demonym_idx` (`demonym`),
+  KEY `Currency_symbol_idx` (`symbol`),
+  KEY `Currency_symbolNative_idx` (`symbolNative`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;

@@ -1,0 +1,32 @@
+[
+    {
+        "name": "宅配(台灣本島)",
+        "description": "0-60cm",
+        "price": 70,
+        "currency": "TWD"
+    },
+    {
+        "name": "7-11超商取貨",
+        "description": "0-60cm",
+        "price": 60,
+        "currency": "TWD"
+    },
+    {
+        "name": "全家超商取貨",
+        "description": "0-60cm",
+        "price": 60,
+        "currency": "TWD"
+    },
+    {
+        "name": "黑貓宅急便",
+        "description": "0-60cm",
+        "price": 90,
+        "currency": "TWD"
+    },
+    {
+        "name": "自取",
+        "description": "",
+        "price": 0,
+        "currency": "TWD"
+    }
+]

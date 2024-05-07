@@ -1,0 +1,10 @@
+[
+    {
+        "name": "stripe",
+        "payurl": "stripe"
+    },
+    {
+        "name": "payal",
+        "payurl": "paypal"
+    }
+]

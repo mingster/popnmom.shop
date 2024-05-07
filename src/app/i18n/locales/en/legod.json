@@ -1,0 +1,10 @@
+{
+    "config_handleSaveClick_btn": "Save",
+    "config_handleNextStep_btn": "Checkout",
+    "config_handleSaveClick_saved": "Product is saved.",
+    "config_handleSaveClick_created": "Product is added",
+    "config_changePart_prompt": "Change color to:",
+    "config_changeChain_prompt": "Chain color:",
+    "config_changeWord_prompt": "Change word:",
+    "cartItem_words":"Selected word:"
+}

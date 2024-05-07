@@ -1,0 +1,22 @@
+{
+    "landing_hero_title": "LEGOD",
+    "landing_hero_txt1": "Make my own",
+    "landing_hero_large": "Large",
+    "landing_hero_small": "Small",
+    "landing_hero_txt2": "it's free to try",
+
+    "landing_aboutus": "About Us",
+    "landing_testimonial": "Testimonial",
+    "landing_contactus": "Conact Us",
+    "landing_submitMessage": "We've received the message. We will reply as soon as we can.",
+    "landing_contactus_form_name_label": "Your name:",
+    "landing_contactus_form_name": "Joe Smith",
+    "landing_contactus_form_email_label": "E-mail address:",
+    "landing_contactus_form_email": "e.g.: joe@hotmail.com",
+    "landing_contactus_form_msg_label": "Message:",
+    "landing_contactus_form_msg": "Hello....",
+    "landing_contactus_form_sending": "Sending...",
+    "landing_contactus_form_sendButton": "Sent",
+    "landing_tos": "Term of service",
+    "landing_privacy": "Privacy"
+}

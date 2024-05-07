@@ -1,0 +1,23 @@
+CREATE TABLE `Address` (
+  `id` varchar(191) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `userId` varchar(191) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `firstName` varchar(191) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `lastName` varchar(191) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `company` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `countryId` varchar(191) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `streetLine1` varchar(191) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `streetLine2` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `city` varchar(191) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `province` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `postalCode` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `phoneNumber` varchar(191) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `isDefault` tinyint(1) NOT NULL DEFAULT '1',
+  `createdAt` datetime(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+  `updatedAt` datetime(3) NOT NULL,
+  `reference` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `type` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `district` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `Address_userId_idx` (`userId`),
+  KEY `Address_countryId_idx` (`countryId`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;

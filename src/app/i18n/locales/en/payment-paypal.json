@@ -1,0 +1,7 @@
+{
+    "success_title": "Payment Sucessed",
+    "failure_title": "Payment Failed",
+    "success_descr": "We have received the payment. Please stand by for seller to process the order.",
+    "payment_stripe_payAmount": "Total",
+    "payment_stripeForm_payButton": "Pay"
+}

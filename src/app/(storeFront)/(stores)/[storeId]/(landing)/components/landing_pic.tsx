@@ -1,0 +1,33 @@
+import Image from 'next/image';
+
+type Props = {
+  name: string;
+  description?: string;
+  image: string;
+};
+
+const Picture = ({ name, description, image }: Props) => {
+  const overlayStyles = `p-5 absolute z-30 flex
+    h-[380px] w-[450px] flex-col items-center justify-center
+    whitespace-normal text-center text-white
+    opacity-0 transition duration-500 hover:opacity-90`;
+
+  return (
+    <li className="relative mx-5 inline-block h-[380px] w-[450px] cursor-pointer">
+      <div className={overlayStyles}>
+        <p className="text-2xl">{name}</p>
+        <p className="mt-5">{description}</p>
+      </div>
+
+      <Image
+        className={'object-cover h-[380px] w-[450px]'}
+        src={image}
+        alt={`${image}`}
+        width={450}
+        height={380}
+      />
+    </li>
+  );
+};
+
+export default Picture;

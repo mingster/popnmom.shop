@@ -1,0 +1,670 @@
+generator client {
+  provider        = "prisma-client-js"
+  previewFeatures = ["views"]
+}
+
+generator zod {
+  provider              = "zod-prisma"
+  output                = "./zod"
+  imports               = ""
+  modelCase             = "camelCase"
+  modelSuffix           = "Model"
+  useDecimalJs          = "true"
+  prismaJsonNullability = "true"
+  relationModel         = "true"
+}
+
+datasource db {
+  provider     = "mysql"
+  url          = env("DATABASE_URL")
+  relationMode = "prisma"
+}
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String? @db.Text
+  access_token      String? @db.Text
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String? @db.Text
+  session_state     String?
+  user              User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+  @@index([userId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+model User {
+  id            String    @id @default(cuid())
+  name          String?
+  email         String?   @unique
+  emailVerified DateTime?
+  image         String?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  accounts      Account[]
+  sessions      Session[]
+  orders        StoreOrder[]    @relation("UserOrders")
+  productReview ProductReview[] @relation("customerProductReview")
+  addresses     Address[]
+  role          Role            @default(USER)
+
+  @@index([email])
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
+
+enum Role {
+  USER
+  ADMIN
+  STORE_OWNER
+}
+
+model Address {
+  id          String   @id @default(uuid())
+  userId      String
+  firstName   String
+  lastName    String
+  company     String?
+  countryId   String
+  streetLine1 String
+  streetLine2 String?
+  city        String
+  district    String?
+  province    String?
+  postalCode  String?
+  phoneNumber String
+  isDefault   Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  reference   String?
+  type        String?
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  country     Country  @relation(fields: [countryId], references: [alpha3])
+
+  @@index([userId])
+  @@index([countryId])
+}
+
+model Country {
+  name          String
+  unCode        String    @unique @db.VarChar(3)
+  allowBilling  Boolean   @default(false)
+  allowShipping Boolean   @default(false)
+  allowInStore  Boolean   @default(false)
+  alpha3        String    @id @unique @db.VarChar(3)
+  address       Address[]
+
+  @@index([name])
+  @@index([alpha3])
+}
+
+model Currency {
+  id             String           @id @unique
+  name           String
+  symbol         String?
+  ISOdigits      Int?
+  ISOnum         Int?
+  decimals       Int?
+  demonym        String
+  majorPlural    String?
+  majorSingle    String?
+  minorPlural    String?
+  minorSingle    String?
+  numToBasic     Int?
+  symbolNative   String
+  productPrice   ProductPrice[]   @relation("ProductPriceToCurrency")
+  tierPrice      TierPrice[]
+  shippingMethod ShippingMethod[]
+
+  @@index([name])
+  @@index([demonym])
+  @@index([symbol])
+  @@index([symbolNative])
+}
+
+model Locale {
+  id                String               @id @unique @db.VarChar(5)
+  name              String
+  lng               String //2 digit language code
+  defaultCurrencyId String
+  localeResource    LocaleResource[]     @relation("LocaleToLocale")
+  storeLocales      StoreLocaleMapping[] @relation("LocaleStoreMapping")
+
+  @@index([id])
+  @@index([name])
+}
+
+model LocaleResource {
+  id            String @id @default(uuid())
+  resourceName  String
+  resourceValue String
+  localeId      String
+  locale        Locale @relation("LocaleToLocale", fields: [localeId], references: [id], onDelete: Cascade)
+
+  @@index([resourceName])
+  @@index([localeId])
+}
+
+model StoreLocaleMapping {
+  id       String @id @default(uuid())
+  storeId  String
+  localeId String
+  store    Store  @relation("StoreLocalesMapping", fields: [storeId], references: [id], onDelete: Cascade)
+  locale   Locale @relation("LocaleStoreMapping", fields: [localeId], references: [id])
+
+  @@unique([storeId, localeId])
+  @@index([storeId])
+  @@index([localeId])
+}
+
+model Store {
+  id                   String                      @id @default(uuid())
+  name                 String
+  userId               String
+  createdAt            DateTime                    @default(now())
+  updatedAt            DateTime                    @updatedAt
+  aboutUs              String?                     @db.LongText
+  aboutUsVideoUrl      String?
+  csAddress            String?
+  csEmail              String?
+  csPhoneNumber        String?
+  description          String?
+  facebookUrl          String?
+  igUrl                String?
+  lineId               String?
+  logo                 String?
+  privacyPolicy        String?                     @db.LongText
+  showcsAddress        Boolean                     @default(false)
+  showcsEmail          Boolean                     @default(false)
+  showcsPhoneNumber    Boolean                     @default(false)
+  tos                  String?                     @db.LongText
+  customDomain         String?
+  defaultCountry       String                      @default("TWN")
+  defaultCurrency      String                      @default("TWD")
+  hasCustomDomain      Boolean                     @default(false)
+  isDeleted            Boolean                     @default(false)
+  defaultLocale        String                      @default("zh-TW")
+  logoPublicId         String?
+  billboards           Billboard[]                 @relation("StoreToBillboard")
+  categories           Category[]                  @relation("StoreToCategory")
+  products             Product[]                   @relation("StoreToProduct")
+  orders               StoreOrder[]                @relation("StoreToOrder")
+  productReview        ProductReview[]             @relation("StoreProductReview")
+  storeLocales         StoreLocaleMapping[]        @relation("StoreLocalesMapping")
+  storeShippingMethods StoreShipMethodMapping[]    @relation("StoreShipMethodMapping")
+  storePaymentMethods  StorePaymentMethodMapping[] @relation("StorePaymentMethodMapping")
+
+  @@index([name])
+  @@index([userId])
+  @@index([customDomain])
+}
+
+model Billboard {
+  id         String     @id @default(uuid())
+  storeId    String
+  label      String
+  imageUrl   String?
+  createdAt  DateTime   @default(now())
+  updatedAt  DateTime   @updatedAt
+  store      Store      @relation("StoreToBillboard", fields: [storeId], references: [id], onDelete: Cascade)
+  categories Category[]
+
+  @@index([storeId])
+}
+
+model Category {
+  id          String    @id @default(uuid())
+  storeId     String
+  billboardId String
+  name        String
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  store       Store     @relation("StoreToCategory", fields: [storeId], references: [id], onDelete: Cascade)
+  billboard   Billboard @relation(fields: [billboardId], references: [id])
+  products    Product[] @relation("CategoryToProduct")
+
+  @@index([storeId])
+  @@index([billboardId])
+}
+
+model CrossSellProduct {
+  id         String  @id @default(uuid())
+  productId1 String
+  productId2 String
+  product1   Product @relation("CrossSellProduct1", fields: [productId1], references: [id], onDelete: Cascade)
+  product2   Product @relation("CrossSellProduct2", fields: [productId2], references: [id], onDelete: Cascade)
+
+  @@index([productId1])
+  @@index([productId2])
+}
+
+model ProductReview {
+  id              String   @id @default(uuid())
+  customerId      String
+  productId       String
+  storeId         String
+  isApproved      Boolean  @default(false)
+  title           String?
+  reviewText      String?
+  rating          Int
+  helpfulYesTotal Int      @default(0)
+  helpfulNoTotal  Int      @default(0)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  customer        User     @relation("customerProductReview", fields: [customerId], references: [id])
+  product         Product  @relation("ProductReviews", fields: [productId], references: [id])
+  store           Store    @relation("StoreProductReview", fields: [storeId], references: [id], onDelete: Cascade)
+
+  @@index([customerId])
+  @@index([productId])
+  @@index([storeId])
+}
+
+model TierPrice {
+  id           String    @id @default(uuid())
+  productId    String
+  minQty       Int
+  maxQty       Int?
+  price        Decimal
+  startingDate DateTime?
+  endDate      DateTime?
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+  currencyId   String    @default("usd")
+  currency     Currency  @relation(fields: [currencyId], references: [id], onDelete: Cascade)
+  product      Product   @relation("tierPrice", fields: [productId], references: [id], onDelete: Cascade)
+
+  @@index([productId])
+  @@index([currencyId])
+}
+
+//product's pricing for the currency
+model ProductPrice {
+  id         String   @id @default(uuid())
+  currencyId String
+  productId  String
+  price      Decimal  @default(0)
+  oldPrice   Decimal  @default(0)
+  isDefault  Boolean  @default(false)
+  currency   Currency @relation("ProductPriceToCurrency", fields: [currencyId], references: [id], onDelete: Cascade)
+  product    Product  @relation("ProductPriceToProduct", fields: [productId], references: [id], onDelete: Cascade)
+
+  @@unique([currencyId, productId])
+  @@index([currencyId])
+  @@index([productId])
+}
+
+model Product {
+  id         String   @id @default(uuid())
+  storeId    String
+  categoryId String
+  name       String
+  isFeatured Boolean  @default(false)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  //userData   String?  @db.Text
+  status     Int      @default(0)
+
+  store             Store              @relation("StoreToProduct", fields: [storeId], references: [id], onDelete: Cascade)
+  category          Category           @relation("CategoryToProduct", fields: [categoryId], references: [id])
+  images            ProductImage[]     @relation("imageToProduct")
+  crossSellProduct1 CrossSellProduct[] @relation("CrossSellProduct1")
+  crossSellProduct2 CrossSellProduct[] @relation("CrossSellProduct2")
+  productReview     ProductReview[]    @relation("ProductReviews")
+  tierPrice         TierPrice[]        @relation("tierPrice")
+  productPrices     ProductPrice[]     @relation("ProductPriceToProduct")
+  productSpec       ProductSpec[]      @relation("prodSpecToProduct")
+  orderItems        OrderItem[]        @relation("itemToProduct")
+  productAttribute  ProductAttribute?  @relation("prodAttrToProduct")
+
+  orderItemWithImageView orderItemWithImageView[]
+
+  @@index([name])
+  @@index([storeId])
+  @@index([categoryId])
+}
+
+model ProductSpec {
+  specId    String @id @default(uuid())
+  productId String
+  specName  String //e.g 顏色、尺寸
+
+  options ProductSpecOptions[] @relation("specOptionToProduct")
+  product Product              @relation("prodSpecToProduct", fields: [productId], references: [id], onDelete: Cascade)
+
+  @@index([productId])
+}
+
+model ProductSpecOptions {
+  optionId   String  @id @default(uuid())
+  specId     String
+  specValue  String //e.g XS, S, M, L, XL
+  price      Decimal @default(0)
+  stock      Int     @default(0)
+  prepareDay Int //備貨天數
+  sku        String?
+  gtin       String?
+
+  productSpec ProductSpec @relation("specOptionToProduct", fields: [specId], references: [specId], onDelete: Cascade)
+
+  @@index([specId])
+}
+
+//additional product attributes
+model ProductAttribute {
+  id                       String    @id @default(uuid())
+  productId                String    @unique
+  description              String?
+  mfgPartNumber            String?
+  isRecurring              Boolean   @default(false)
+  cycleLen                 Int?
+  cyclePeriod              Int?
+  tytalCycles              Int?
+  isBrandNew               Boolean   @default(true)
+  isShipRequired           Boolean   @default(false)
+  isFreeShipping           Boolean   @default(false)
+  additionalShipCost       Decimal   @default(0)
+  stock                    Int       @default(0)
+  displayStockAvailability Boolean   @default(false)
+  displayStockQuantity     Boolean   @default(false)
+  allowBackOrder           Boolean   @default(false)
+  orderMinQuantity         Int       @default(1)
+  orderMaxQuantity         Int       @default(0)
+  disableBuyButton         Boolean   @default(false)
+  weight                   Decimal   @default(0)
+  height                   Decimal   @default(0)
+  width                    Decimal   @default(0)
+  availableStartDate       DateTime?
+  availableEndDate         DateTime?
+
+  product Product @relation("prodAttrToProduct", fields: [productId], references: [id], onDelete: Cascade)
+
+  @@index([productId])
+}
+
+model ProductImage {
+  id                 String  @id @default(uuid())
+  productId          String
+  url                String  @unique
+  publicId           String  @unique
+  name               String?
+  description        String?
+  shownInLandingPage Boolean @default(false)
+
+  product Product @relation("imageToProduct", fields: [productId], references: [id], onDelete: Cascade)
+
+  @@index([productId])
+  @@index([url])
+  @@index([publicId])
+}
+
+model OrderItem {
+  id           String  @id @default(uuid())
+  orderId      String
+  productId    String
+  quantity     Int     @default(1)
+  unitDiscount Decimal @default(0)
+  unitPrice    Decimal @default(0)
+
+  order   StoreOrder @relation("itemToStoreOrder", fields: [orderId], references: [id], onDelete: Cascade)
+  product Product    @relation("itemToProduct", fields: [productId], references: [id])
+
+  @@index([orderId])
+  @@index([productId])
+}
+
+model OrderNote {
+  id                String     @id @default(uuid())
+  orderId           String
+  note              String     @db.Text
+  displayToCustomer Boolean    @default(false)
+  createdAt         DateTime   @default(now())
+  updatedAt         DateTime   @updatedAt
+  order             StoreOrder @relation("orderNoteToStoreOrder", fields: [orderId], references: [id], onDelete: Cascade)
+
+  @@index([orderId])
+}
+
+model StoreOrder {
+  id                 String  @id @default(uuid())
+  storeId            String
+  userId             String
+  isPaid             Boolean @default(false)
+  checkoutAttributes String  @default("")
+  currency           String  @default("usd")
+  currencyRate       Decimal @default(1)
+  discount           Decimal @default(0)
+  orderTax           Decimal @default(0)
+  paymentMethodId    String?
+  paymentStatus      Int     @default(10) //should be value in @/lib/enum/PaymentStatus
+  refundAmount       Decimal @default(0)
+  returnStatus       Int     @default(0) //should be value in @/lib/enum/ReturnStatus
+
+  shippingMethodId String
+  shippingAddress  String   @default("")
+  shippingCost     Decimal  @default(0)
+  shippingStatus   Int      @default(10) //should be value in @/lib/enum/ShippingStatus
+  taxRate          Decimal  @default(0)
+  checkoutRef      String   @default("")
+  orderStatus      Int      @default(10) //should be value in @/lib/enum/OrderStatus
+  paymentCost      Decimal  @default(0)
+  orderTotal       Decimal  @default(0)
+  //userData           String?  @db.Text  -> move to OrderNote
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  store          Store          @relation("StoreToOrder", fields: [storeId], references: [id], onDelete: Cascade)
+  user           User           @relation("UserOrders", fields: [userId], references: [id])
+  shippingMethod ShippingMethod @relation("StoreOrdertoShipMethod", fields: [shippingMethodId], references: [id])
+  paymentMethod  PaymentMethod? @relation("StoreOrdertoPaymentMethod", fields: [paymentMethodId], references: [id])
+
+  orderItems          OrderItem[]              @relation("itemToStoreOrder")
+  orderItemsWithImage orderItemWithImageView[] @relation("itemWithImgViewToStoreOrder")
+  orderNotes          OrderNote[]              @relation("orderNoteToStoreOrder")
+  shipments           Shipment[]               @relation("OrderShipment")
+
+  @@index([userId])
+  @@index([paymentMethodId])
+  @@index([paymentStatus])
+  @@index([returnStatus])
+  @@index([shippingMethodId])
+  @@index([shippingStatus])
+  @@index([storeId])
+  @@index([checkoutAttributes])
+}
+
+model ShippingMethod {
+  id          String                   @id @default(uuid())
+  name        String                   @unique
+  description String?
+  basic_price Decimal
+  isDeleted   Boolean                  @default(false)
+  createdAt   DateTime                 @default(now())
+  updatedAt   DateTime                 @updatedAt
+  currencyId  String
+  currency    Currency                 @relation(fields: [currencyId], references: [id])
+  stores      StoreShipMethodMapping[] @relation("ShipMethodStoreMapping")
+  prices      ShippingMethodPrice[]    @relation("ShipMethodPrices")
+
+  shipment   Shipment[]   @relation("ShipmentToShipMethod")
+  storeOrder StoreOrder[] @relation("StoreOrdertoShipMethod")
+
+  @@index([name])
+  @@index([currencyId])
+}
+
+model ShippingMethodPrice {
+  id               String  @id @default(uuid())
+  methodId         String
+  dimension_length Int //measurement in cm 長寬高
+  dimension_width  Int //measurement in cm
+  dimension_height Int //measurement in cm
+  dimension_weight Int //measurement in kg
+  price            Decimal
+
+  shippingMethod ShippingMethod @relation("ShipMethodPrices", fields: [methodId], references: [id])
+
+  @@index([methodId])
+}
+
+model StoreShipMethodMapping {
+  id             String         @id @default(uuid())
+  storeId        String
+  methodId       String
+  store          Store          @relation("StoreShipMethodMapping", fields: [storeId], references: [id], onDelete: Cascade)
+  shippingMethod ShippingMethod @relation("ShipMethodStoreMapping", fields: [methodId], references: [id])
+
+  @@unique([storeId, methodId])
+  @@index([storeId])
+  @@index([methodId])
+}
+
+model PaymentMethod {
+  id         String                      @id @default(uuid())
+  name       String                      @unique
+  payUrl     String                      @default("")
+  isDeleted  Boolean                     @default(false)
+  createdAt  DateTime                    @default(now())
+  updatedAt  DateTime                    @updatedAt
+  stores     StorePaymentMethodMapping[] @relation("PaymentMethodMapping")
+  storeOrder StoreOrder[]                @relation("StoreOrdertoPaymentMethod")
+}
+
+model StorePaymentMethodMapping {
+  id                 String        @id @default(uuid())
+  storeId            String
+  paymentMethodId    String
+  paymentDisplayName String?
+  store              Store         @relation("StorePaymentMethodMapping", fields: [storeId], references: [id], onDelete: Cascade)
+  paymentMethod      PaymentMethod @relation("PaymentMethodMapping", fields: [paymentMethodId], references: [id], onDelete: Cascade)
+
+  @@unique([storeId, paymentMethodId])
+  @@index([storeId])
+  @@index([paymentMethodId])
+}
+
+model Shipment {
+  id                 String    @id @default(uuid())
+  orderId            String
+  shippingMethodId   String
+  trackingNumber     String?
+  trackingUrl        String?
+  shippingCost       Decimal
+  shippingStatus     Int       @default(10) //should be value in @/lib/enum/ShippingStatus
+  totalWeight        Decimal?
+  shippedDate        DateTime?
+  deliveryDate       DateTime?
+  readyForPickupDate DateTime?
+  createdAt          DateTime  @default(now())
+  updatedAt          DateTime  @updatedAt
+
+  order          StoreOrder     @relation("OrderShipment", fields: [orderId], references: [id], onDelete: Cascade)
+  shippingMethod ShippingMethod @relation("ShipmentToShipMethod", fields: [shippingMethodId], references: [id])
+
+  @@index([orderId])
+  @@index([shippingMethodId])
+}
+
+// https://www.prisma.io/docs/concepts/components/prisma-schema/views
+// If you apply changes to your Prisma schema with Prisma Migrate or db push, Prisma does not create or run any SQL related to views.
+// To include views in a migration, run migrate dev --create-only and then manually add the SQL for views to your migration file. 
+// Alternatively, you can create views manually in the database.
+
+view productDefaultPriceView {
+  id         String   @unique
+  storeId    String
+  categoryId String
+  name       String
+  isFeatured Boolean  @default(false)
+  status     Int
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime
+  userData   String?  @db.Text
+  price      Decimal
+  currency   String
+}
+
+view productPricesView {
+  id         String   @unique
+  storeId    String
+  categoryId String
+  name       String
+  isFeatured Boolean  @default(false)
+  status     Int
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime
+  userData   String?  @db.Text
+  price      Decimal
+  currency   String
+}
+
+view orderItemWithImageView {
+  id           String  @unique
+  orderId      String
+  productId    String
+  quantity     Int     @default(1)
+  unitDiscount Decimal @default(0)
+  unitPrice    Decimal @default(0)
+  name         String
+  url          String?
+
+  order   StoreOrder @relation("itemWithImgViewToStoreOrder", fields: [orderId], references: [id])
+  product Product    @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@index([orderId])
+  @@index([productId])
+}
+
+view productImageView {
+  id                 String  @unique
+  productId          String
+  storeId            String
+  url                String
+  publicId           String
+  name               String
+  description        String
+  shownInLandingPage Boolean
+}
+
+view productSpecView {
+  id         String
+  storeId    String
+  categoryId String
+  name       String
+  isFeatured Boolean  @default(false)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  userData   String?  @db.Text
+  status     Int      @default(0)
+  specName   String
+  specId     String
+  optionId   String   @id @default(uuid())
+  specValue  String
+  price      Decimal  @default(0)
+  stock      Int      @default(0)
+  prepareDay Int //備貨天數
+  sku        String?
+}
