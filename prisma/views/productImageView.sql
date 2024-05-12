@@ -1,5 +1,3 @@
-drop view productImageView;
-
 create view productImageView as
 
 SELECT
@@ -13,6 +11,6 @@ SELECT
   `p`.`storeId` AS `storeId`
 FROM
   (
-    `legod`.`ProductImage` `img`
-    LEFT JOIN `legod`.`Product` `p` ON((`img`.`productId` = `p`.`id`))
+    `ProductImage` `img`
+    LEFT JOIN `Product` `p` ON((`img`.`productId` = `p`.`id`))
   )

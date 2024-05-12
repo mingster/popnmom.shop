@@ -1,8 +1,7 @@
-drop view productDefaultPriceView;
 
 create view productDefaultPriceView as
 
-select 
+select
 p.*,
     `pp`.`price` AS `price`,
     `pp`.`currencyId` AS `currency`

@@ -1,5 +1,3 @@
-drop view productPricesView;
-
 create view productPricesView as
 select p.*,
     `pp`.`price` AS `price`,

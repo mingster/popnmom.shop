@@ -1,5 +1,3 @@
-drop view productSpecView;
-
 create view productSpecView AS
 select p.*,
     ps.specName,
